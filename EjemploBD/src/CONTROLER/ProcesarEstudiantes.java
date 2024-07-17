@@ -22,4 +22,10 @@ public class ProcesarEstudiantes {
     public ArrayList<Estudiante> getLstEstudiantes() {
         return (new ConeccionDB()).getLstEstudiantes();
     }
+    public void updateEstudiante(Estudiante estudiante){
+        (new ConeccionDB()).updateEstudiante(estudiante);
+    }
+    public void deletedEstudiante(String id){
+        (new ConeccionDB()).deletedEstudiante(id);
+    }
 }
