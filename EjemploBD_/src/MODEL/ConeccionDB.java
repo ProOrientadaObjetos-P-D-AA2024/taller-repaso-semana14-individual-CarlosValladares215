@@ -1,3 +1,4 @@
+
 package MODEL;
 
 import java.sql.Connection;
@@ -8,26 +9,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ConeccionDB {
-
     public Connection concDB;
     public ArrayList<Estudiante> lstEstudiantes;
     public String msj;
-
-    public void establecerConexion() {
+    
+     public void establecerConexion() {
 
         try {
-            String url = "jdbc:sqlite:bd/dbTest1.db";
-            // La base da datos se usa para conectarse, mientras que la tabla permite realizar acciones CRUD
+            String url = "jdbc:sqlite:DB/dbTest1.db";
             concDB = DriverManager.getConnection(url);
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-    }
-
-    // devuelve un valor booleano
-    public Connection obtenerConeccion() {
-        return concDB;
     }
 
     public void setConcDB(String url) {
@@ -38,7 +32,6 @@ public class ConeccionDB {
         }
     }
 
-    // READ
     public ArrayList<Estudiante> getLstEstudiantes() {
         lstEstudiantes = new ArrayList<>();
         try {
@@ -46,13 +39,15 @@ public class ConeccionDB {
             try (Statement statement = concDB.createStatement()) {
                 ResultSet resultSet = statement.executeQuery("Select * from Estudiante");
                 while (resultSet.next()) {
-                    lstEstudiantes.add(new Estudiante(resultSet.getString("nombreEst"),
-                            resultSet.getDouble("nota1"),
-                            resultSet.getDouble("nota2"),
-                            resultSet.getDouble("promedio"),
-                            resultSet.getString("estado"),
-                            resultSet.getString("id")));
+                    lstEstudiantes.add(new Estudiante(
+                            resultSet.getString("cedula"),
+                            resultSet.getString("nombre"),
+                            resultSet.getInt("nota_1"),
+                            resultSet.getInt("nota_2"),
+                            resultSet.getInt("promedio"),
+                            resultSet.getString("estado")));
                 }
+            
             }
         } catch (SQLException sqlException) {
             this.msj = sqlException.getMessage();
@@ -60,14 +55,13 @@ public class ConeccionDB {
         return lstEstudiantes;
     }
 
-    // CREATED
-    public void insertarEstudiante(Estudiante estudiante) {
+     public void insertarEstudiante(Estudiante estudiante) {
         try {
             establecerConexion();
             try (Statement statement = concDB.createStatement()) {
-                String strInsertEst = String.format("INSERT INTO Estudiante(nombreEst, nota1, nota2, promedio, estado, id) "
-                        + "values('%s', %d, %d, %d, '%s','%s')", estudiante.nombreEst, (int) estudiante.nota1,
-                        (int) estudiante.nota2, (int) estudiante.promedio, estudiante.estado, estudiante.id);
+                String strInsertEst = String.format("INSERT INTO Estudiante(cedula, nombreEst, nota1, nota2, promedio, estado) "
+                        + "values('%s','%s', %d, %d, %d, '%s')",estudiante.cedula, estudiante.nombre, estudiante.nota1,
+                        estudiante.nota2, estudiante.promedio, estudiante.estado);
                 statement.executeUpdate(strInsertEst);
             }
         } catch (SQLException sqlException) {
@@ -75,34 +69,30 @@ public class ConeccionDB {
         }
     }
 
-    // UPDATE
-    public void updateEstudiante(Estudiante estudiante) {
+    public void actualizarEstudiante(Estudiante estudiante) {
         try {
             establecerConexion();
             try (Statement statement = concDB.createStatement()) {
                 String strUpdateEst = String.format("UPDATE Estudiante SET "
-                        + "nombreEst = '%s', "
+                        + "nombre = '%s', "
+                        + "nota_1 = %d, "
+                        + "nota_2 = %d, "
+                        + "promedio = %d "
                         + "estado = '%s', "
-                        + "nota1 = %.2f, "
-                        + "nota2 = %.2f, "
-                        + "promedio = %.2f "
-                        + "WHERE id = '%s'",
-                        estudiante.getNombreEst(), estudiante.getEstado(), estudiante.getNota1(), estudiante.getNota2(), estudiante.getPromedio(), estudiante.getId());
+                        + "WHERE cedula = '%s'",
+                        estudiante.nombre, estudiante.nota1, estudiante.nota2,estudiante.promedio,estudiante.estado, estudiante.cedula);
                 statement.executeUpdate(strUpdateEst);
-                System.out.println("Estudiante actualizado en la base de datos: " + estudiante.getNombreEst());
             }
         } catch (SQLException sqlException) {
             this.msj = sqlException.getMessage();
-            System.out.println("Error al actualizar estudiante: " + this.msj);
         }
     }
 
-    // DELETED
-    public void deletedEstudiante(String id) {
+    public void borrarEstudiante(Estudiante estudiante) {
         try {
             establecerConexion();
             try (Statement statement = concDB.createStatement()) {
-                String strInsertEst = String.format("delete from Estudiante where id='%s'", id);
+                String strInsertEst = String.format("delete from Estudiante where cedula='%s'", estudiante.cedula);
                 statement.executeUpdate(strInsertEst);
             }
         } catch (SQLException sqlException) {
